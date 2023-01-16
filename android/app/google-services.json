@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "760736920039",
+    "project_id": "farmers-assistance-tool",
+    "storage_bucket": "farmers-assistance-tool.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:760736920039:android:dddbe678badfeebf764d42",
+        "android_client_info": {
+          "package_name": "com.example.farmers_assistance_tool"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "760736920039-veova76v0bhg2k0glvhcq25eli1mdv9b.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.farmers_assistance_tool",
+            "certificate_hash": "2095ae01f95ce190643c90729c716ca63fd68c5d"
+          }
+        },
+        {
+          "client_id": "760736920039-dua43l34qu7ksrmmnjoes9o9u5dnbs9i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA67iBUmla88D6ljVUx4NBS_hUUlYiOgLs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "760736920039-dua43l34qu7ksrmmnjoes9o9u5dnbs9i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
