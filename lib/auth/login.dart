@@ -107,7 +107,10 @@ class _loginState extends State<login> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => HomePage(phoneNo: phoneNo,),
+                              builder: (context) => HomePage(
+                                currentIndex: 0,
+                                phoneNo: phoneNo,
+                              ),
                             ),
                           );
                         } catch (e) {

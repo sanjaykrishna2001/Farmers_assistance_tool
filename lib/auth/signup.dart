@@ -135,7 +135,10 @@ class _signupState extends State<signup> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => HomePage(phoneNo: phoneNo,),
+                              builder: (context) => HomePage(
+                                currentIndex: 0,
+                                phoneNo: phoneNo,
+                              ),
                             ),
                           );
                         } catch (e) {

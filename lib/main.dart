@@ -35,7 +35,7 @@ class MyApp extends StatefulWidget {
   //       return CircularProgressIndicator();
   //     },
   //   );
-  
+
   const MyApp({super.key});
 
   @override
@@ -47,7 +47,12 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: login(),
+      home:
+          // HomePage(
+          //   currentIndex: 0,
+          //   phoneNo: "+919902513539",
+          // )
+          login(),
     );
   }
 }
