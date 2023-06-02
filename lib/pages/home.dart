@@ -41,6 +41,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Farmers assistance tool'),
+        automaticallyImplyLeading: false,
         actions: [
           IconButton(
             icon: const Icon(

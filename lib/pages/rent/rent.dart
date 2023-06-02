@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 class Rent extends StatefulWidget {
   final String phoneNo;
   final int currentIndex;
-  const Rent({super.key, required this.currentIndex, required this.phoneNo});
+
+  const Rent({Key? key, required this.currentIndex, required this.phoneNo})
+      : super(key: key);
 
   @override
   State<Rent> createState() => _RentState(currentIndex, phoneNo);
@@ -14,12 +16,39 @@ class Rent extends StatefulWidget {
 class _RentState extends State<Rent> {
   late String phoneNo;
   late int currentIndex;
+
   _RentState(this.currentIndex, this.phoneNo);
 
   var db = FirebaseFirestore.instance;
 
+  late List<Map> items;
+  late List<Map> filteredItems;
+  late TextEditingController searchController;
+
   final Stream<QuerySnapshot> _usersStream =
       FirebaseFirestore.instance.collection('rent_equipments').snapshots();
+
+  @override
+  void initState() {
+    super.initState();
+    filteredItems = [];
+    searchController = TextEditingController();
+  }
+
+  void filterItems(String query) {
+    setState(() {
+      filteredItems = items.where((item) {
+        final itemName = item['equipmentName'].toString().toLowerCase();
+        return itemName.contains(query.toLowerCase());
+      }).toList();
+    });
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,158 +60,234 @@ class _RentState extends State<Rent> {
         }
 
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Text("Loading");
+          return const Center(child: CircularProgressIndicator());
         }
-        //  if(snapshot.hasData){
-        // ignore: prefer_typing_uninitialized_variables, avoid_init_to_null
-        // snapshot.data!.docs.map((DocumentSnapshot document) {
-        //   Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
-        // });
+
         QuerySnapshot<Object?>? querySnapshot = snapshot.data;
         List<QueryDocumentSnapshot<Object?>>? documents = querySnapshot?.docs;
-        //Convert the documents to Maps
-        List<Map>? items = documents?.map((e) => e.data() as Map).toList();
+        items = documents?.map((e) => e.data() as Map).toList() ?? [];
 
-        return Center(
-          child: Container(
-            width: double.infinity,
-            height: double.infinity,
-            color: Colors.orange,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: Container(
-                      margin: const EdgeInsets.only(right: 10),
-                      child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.all(10)),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => AddEquipment(
-                                  phoneNo: phoneNo,
-                                ),
-                              ),
-                            );
-                          },
-                          child: const Text("Add")),
-                    ),
+        return Scaffold(
+          appBar: AppBar(
+            title: Text('Rent'),
+            actions: [
+              IconButton(
+                onPressed: () {
+                  showSearch(
+                    context: context,
+                    delegate: SearchBar(this),
+                  );
+                },
+                icon: Icon(Icons.search),
+              ),
+            ],
+          ),
+          body: Container(
+            color: Colors.white,
+            child: ListView.builder(
+              itemCount: filteredItems.length,
+              itemBuilder: (BuildContext context, int index) {
+                Map thisItem = filteredItems[index];
+
+                return Card(
+                  margin: const EdgeInsets.all(10),
+                  color: Colors.orange.shade100,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  Container(
-                    color: Colors.blue,
-                    child: Expanded(
-                      child: ListView.builder(
-                        scrollDirection: Axis.vertical,
-                        shrinkWrap: true,
-                        physics: ClampingScrollPhysics(),
-                        itemCount: items?.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          //Get the item at this index
-                          Map thisItem = items![index];
-                          //REturn the widget for the list items
-                          return Container(
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(5),
-                                border: Border.all(color: Colors.black)),
-                            margin: const EdgeInsets.all(10),
-                            child: ListTile(
-                              title: Container(
-                                margin: EdgeInsets.only(bottom: 5),
-                                height: 200,
-                                width: 150,
-                                child: thisItem.containsKey('image')
-                                    ? Image.network('${thisItem['image']}')
-                                    : Container(),
-                              ),
-                              subtitle: Container(
-                                color: Colors.green,
-                                child: Column(children: [
-                                  Row(
-                                    children: [
-                                      const Text("Equipment Name:",
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 17)),
-                                      Text(' ${thisItem['equipmentName']}',
-                                          style: const TextStyle(fontSize: 17)),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      const Text("Price:",
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 17)),
-                                      Text(' ${thisItem['price']}',
-                                          style: const TextStyle(fontSize: 17)),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      const Text("Description:",
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 17)),
-                                      Text(' ${thisItem['description']}',
-                                          style: const TextStyle(fontSize: 17)),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      const Text("Location:",
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 17)),
-                                      Text(' ${thisItem['location']}',
-                                          style: const TextStyle(fontSize: 17)),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      const Text("Contact:",
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 17)),
-                                      Text(' ${thisItem['owner']}',
-                                          style: const TextStyle(fontSize: 17)),
-                                    ],
-                                  ),
-                                ]),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Container(
+                        height: 200,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(10),
+                          ),
+                          image: DecorationImage(
+                            image: NetworkImage(
+                              thisItem.containsKey('image')
+                                  ? '${thisItem['image']}'
+                                  : 'your_default_image_url',
+                            ),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${thisItem['equipmentName']}',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          );
-                        },
+                            SizedBox(height: 5),
+                            Text(
+                              'Price: \$${thisItem['price']}',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            SizedBox(height: 5),
+                            Text(
+                              'Description: ${thisItem['description']}',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            SizedBox(height: 5),
+                            Text(
+                              'Location: ${thisItem['location']}',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            SizedBox(height: 5),
+                            Text(
+                              'Contact: ${thisItem['owner']}',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                  // const Text(
-                  //   "hello",
-                  //   style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-                  // ),
-                  // const Text(
-                  //   'Your phone number is',
-                  //   style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-                  // ),
-                  // Text(
-                  //   phoneNo,
-                  //   style: const TextStyle(
-                  //       fontSize: 17, fontWeight: FontWeight.bold),
-                  // ),
-                  // const Text(
-                  //   'This is eqipment renting page',
-                  //   style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-                  // ),
-                ],
-              ),
+                );
+              },
             ),
           ),
+          floatingActionButton: FloatingActionButton.extended(
+            backgroundColor: Colors.orange,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AddEquipment(
+                    phoneNo: phoneNo,
+                  ),
+                ),
+              );
+            },
+            label: Text('Add'),
+            icon: Icon(Icons.add),
+          ),
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.endFloat,
         );
       },
     );
+  }
+}
+
+class SearchBar extends SearchDelegate<String> {
+  final _RentState rentState;
+
+  SearchBar(this.rentState);
+
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: Icon(Icons.clear),
+        onPressed: () {
+          query = '';
+        },
+      ),
+    ];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      icon: Icon(Icons.arrow_back),
+      onPressed: () {
+        close(context, '');
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      rentState.filterItems(query);
+    });
+
+    return Container(
+      color: Colors.white,
+      child: ListView.builder(
+        itemCount: rentState.filteredItems.length,
+        itemBuilder: (BuildContext context, int index) {
+          Map thisItem = rentState.filteredItems[index];
+
+          return Card(
+            margin: const EdgeInsets.all(10),
+            color: Colors.orange.shade100,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  height: 200,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(10),
+                    ),
+                    image: DecorationImage(
+                      image: NetworkImage(
+                        thisItem.containsKey('image')
+                            ? '${thisItem['image']}'
+                            : 'your_default_image_url',
+                      ),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${thisItem['equipmentName']}',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 5),
+                      Text(
+                        'Price: \$${thisItem['price']}',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      SizedBox(height: 5),
+                      Text(
+                        'Description: ${thisItem['description']}',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      SizedBox(height: 5),
+                      Text(
+                        'Location: ${thisItem['location']}',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      SizedBox(height: 5),
+                      Text(
+                        'Contact: ${thisItem['owner']}',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    return Container();
   }
 }

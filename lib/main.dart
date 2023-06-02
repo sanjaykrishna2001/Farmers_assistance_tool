@@ -46,13 +46,12 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home:
-          // HomePage(
-          //   currentIndex: 0,
-          //   phoneNo: "+919902513539",
-          // )
-          login(),
-    );
+        debugShowCheckedModeBanner: false,
+        home: HomePage(
+          currentIndex: 0,
+          phoneNo: "+919902513539",
+        )
+        // login(),
+        );
   }
 }

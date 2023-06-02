@@ -176,6 +176,7 @@ class _AddEquipmentState extends State<AddEquipment> {
                       icon: const Icon(Icons.upload)),
               ],
             ),
+            const SizedBox(height: 20),
             Align(
               alignment: Alignment.center,
               child: Container(
@@ -197,9 +198,13 @@ class _AddEquipmentState extends State<AddEquipment> {
                               .putFile(File(file!.path));
                           imageUrl =
                               await referenceImageToUpload.getDownloadURL();
-                          if (equipmentName != null &&
-                              price != null &&
-                              description != null) {
+                          if (equipmentName != "" &&
+                              price != "" &&
+                              description != "" &&
+                              location != "" &&
+                              imageUrl != "" &&
+                              phoneNo != "" &&
+                              file != null) {
                             Map<String, String> data = {
                               'equipmentName': equipmentName,
                               'price': price,

@@ -59,7 +59,7 @@ class _AddCropState extends State<AddCrop> {
             ),
             const SizedBox(height: 20),
             const Text(
-              "Enter Price per ton",
+              "Enter Price per Kg",
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             Padding(
@@ -176,6 +176,7 @@ class _AddCropState extends State<AddCrop> {
                       icon: const Icon(Icons.upload)),
               ],
             ),
+            const SizedBox(height: 20),
             Align(
               alignment: Alignment.center,
               child: Container(
@@ -197,9 +198,13 @@ class _AddCropState extends State<AddCrop> {
                               .putFile(File(file!.path));
                           imageUrl =
                               await referenceImageToUpload.getDownloadURL();
-                          if (cropName != null &&
-                              price != null &&
-                              description != null) {
+                          if (cropName != "" &&
+                              price != "" &&
+                              description != "" &&
+                              location != "" &&
+                              imageUrl != "" &&
+                              phoneNo != "" &&
+                              file != null) {
                             Map<String, String> data = {
                               'cropName': cropName,
                               'price': price,
