@@ -24,6 +24,7 @@ class _RentState extends State<Rent> {
   late List<Map> items;
   late List<Map> filteredItems;
   late TextEditingController searchController;
+  String sortOption = 'Price (Low to High)';
 
   final Stream<QuerySnapshot> _usersStream =
       FirebaseFirestore.instance.collection('rent_equipments').snapshots();
@@ -37,10 +38,25 @@ class _RentState extends State<Rent> {
 
   void filterItems(String query) {
     setState(() {
-      filteredItems = items.where((item) {
-        final itemName = item['equipmentName'].toString().toLowerCase();
-        return itemName.contains(query.toLowerCase());
-      }).toList();
+      if (query.isEmpty) {
+        filteredItems = List.from(items);
+      } else {
+        filteredItems = items.where((item) {
+          final itemName = item['equipmentName'].toString().toLowerCase();
+          return itemName.contains(query.toLowerCase());
+        }).toList();
+      }
+      sortItems();
+    });
+  }
+
+  void sortItems() {
+    setState(() {
+      if (sortOption == 'Price (Low to High)') {
+        filteredItems.sort((a, b) => a['price'].compareTo(b['price']));
+      } else if (sortOption == 'Price (High to Low)') {
+        filteredItems.sort((a, b) => b['price'].compareTo(a['price']));
+      }
     });
   }
 
@@ -67,11 +83,14 @@ class _RentState extends State<Rent> {
         List<QueryDocumentSnapshot<Object?>>? documents = querySnapshot?.docs;
         items = documents?.map((e) => e.data() as Map).toList() ?? [];
 
+        if (filteredItems.isEmpty) {
+          filteredItems = List.from(items);
+        }
+
         return Scaffold(
           body: Column(
             children: [
               Container(
-                color: Colors.orange,
                 padding: EdgeInsets.all(10),
                 child: Row(
                   children: [
@@ -82,8 +101,6 @@ class _RentState extends State<Rent> {
                           filterItems(value);
                         },
                         decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
                           hintText: 'Search by equipment name',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -91,20 +108,31 @@ class _RentState extends State<Rent> {
                         ),
                       ),
                     ),
-                    InkWell(
-                      onTap: () {
+                    IconButton(
+                      onPressed: () {
                         searchController.clear();
                         filterItems('');
                       },
-                      child: Container(
-                        margin: EdgeInsets.only(left: 10),
-                        padding: EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Icon(Icons.clear),
-                      ),
+                      icon: Icon(Icons.clear),
+                    ),
+                    SizedBox(width: 10),
+                    DropdownButton<String>(
+                      value: sortOption,
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          sortOption = newValue!;
+                          sortItems();
+                        });
+                      },
+                      items: <String>[
+                        'Price (Low to High)',
+                        'Price (High to Low)'
+                      ].map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
                     ),
                   ],
                 ),
@@ -154,7 +182,7 @@ class _RentState extends State<Rent> {
                                 ),
                                 SizedBox(height: 5),
                                 Text(
-                                  'Price: \$${thisItem['price']}',
+                                  'Price: \u20B9${thisItem['price']}',
                                   style: TextStyle(fontSize: 16),
                                 ),
                                 SizedBox(height: 5),
