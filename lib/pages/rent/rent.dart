@@ -24,7 +24,6 @@ class _RentState extends State<Rent> {
   late List<Map> items;
   late List<Map> filteredItems;
   late TextEditingController searchController;
-  String sortOption = 'Price (Low to High)';
 
   final Stream<QuerySnapshot> _usersStream =
       FirebaseFirestore.instance.collection('rent_equipments').snapshots();
@@ -45,17 +44,6 @@ class _RentState extends State<Rent> {
           final itemName = item['equipmentName'].toString().toLowerCase();
           return itemName.contains(query.toLowerCase());
         }).toList();
-      }
-      sortItems();
-    });
-  }
-
-  void sortItems() {
-    setState(() {
-      if (sortOption == 'Price (Low to High)') {
-        filteredItems.sort((a, b) => a['price'].compareTo(b['price']));
-      } else if (sortOption == 'Price (High to Low)') {
-        filteredItems.sort((a, b) => b['price'].compareTo(a['price']));
       }
     });
   }
@@ -114,25 +102,6 @@ class _RentState extends State<Rent> {
                         filterItems('');
                       },
                       icon: Icon(Icons.clear),
-                    ),
-                    SizedBox(width: 10),
-                    DropdownButton<String>(
-                      value: sortOption,
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          sortOption = newValue!;
-                          sortItems();
-                        });
-                      },
-                      items: <String>[
-                        'Price (Low to High)',
-                        'Price (High to Low)'
-                      ].map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
                     ),
                   ],
                 ),
