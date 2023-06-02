@@ -68,92 +68,120 @@ class _RentState extends State<Rent> {
         items = documents?.map((e) => e.data() as Map).toList() ?? [];
 
         return Scaffold(
-          appBar: AppBar(
-            title: Text('Rent'),
-            actions: [
-              IconButton(
-                onPressed: () {
-                  showSearch(
-                    context: context,
-                    delegate: SearchBar(this),
-                  );
-                },
-                icon: Icon(Icons.search),
-              ),
-            ],
-          ),
-          body: Container(
-            color: Colors.white,
-            child: ListView.builder(
-              itemCount: filteredItems.length,
-              itemBuilder: (BuildContext context, int index) {
-                Map thisItem = filteredItems[index];
-
-                return Card(
-                  margin: const EdgeInsets.all(10),
-                  color: Colors.orange.shade100,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Container(
-                        height: 200,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.vertical(
-                            top: Radius.circular(10),
-                          ),
-                          image: DecorationImage(
-                            image: NetworkImage(
-                              thisItem.containsKey('image')
-                                  ? '${thisItem['image']}'
-                                  : 'your_default_image_url',
-                            ),
-                            fit: BoxFit.cover,
+          body: Column(
+            children: [
+              Container(
+                color: Colors.orange,
+                padding: EdgeInsets.all(10),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: searchController,
+                        onChanged: (value) {
+                          filterItems(value);
+                        },
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          hintText: 'Search by equipment name',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '${thisItem['equipmentName']}',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                    ),
+                    InkWell(
+                      onTap: () {
+                        searchController.clear();
+                        filterItems('');
+                      },
+                      child: Container(
+                        margin: EdgeInsets.only(left: 10),
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(Icons.clear),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: filteredItems.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    Map thisItem = filteredItems[index];
+
+                    return Card(
+                      margin: const EdgeInsets.all(10),
+                      color: Colors.orange.shade100,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Container(
+                            height: 200,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(10),
+                              ),
+                              image: DecorationImage(
+                                image: NetworkImage(
+                                  thisItem.containsKey('image')
+                                      ? '${thisItem['image']}'
+                                      : 'your_default_image_url',
+                                ),
+                                fit: BoxFit.cover,
                               ),
                             ),
-                            SizedBox(height: 5),
-                            Text(
-                              'Price: \$${thisItem['price']}',
-                              style: TextStyle(fontSize: 16),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${thisItem['equipmentName']}',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(height: 5),
+                                Text(
+                                  'Price: \$${thisItem['price']}',
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                                SizedBox(height: 5),
+                                Text(
+                                  'Description: ${thisItem['description']}',
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                                SizedBox(height: 5),
+                                Text(
+                                  'Location: ${thisItem['location']}',
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                                SizedBox(height: 5),
+                                Text(
+                                  'Contact: ${thisItem['owner']}',
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                              ],
                             ),
-                            SizedBox(height: 5),
-                            Text(
-                              'Description: ${thisItem['description']}',
-                              style: TextStyle(fontSize: 16),
-                            ),
-                            SizedBox(height: 5),
-                            Text(
-                              'Location: ${thisItem['location']}',
-                              style: TextStyle(fontSize: 16),
-                            ),
-                            SizedBox(height: 5),
-                            Text(
-                              'Contact: ${thisItem['owner']}',
-                              style: TextStyle(fontSize: 16),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                );
-              },
-            ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
           floatingActionButton: FloatingActionButton.extended(
             backgroundColor: Colors.orange,
@@ -175,119 +203,5 @@ class _RentState extends State<Rent> {
         );
       },
     );
-  }
-}
-
-class SearchBar extends SearchDelegate<String> {
-  final _RentState rentState;
-
-  SearchBar(this.rentState);
-
-  @override
-  List<Widget> buildActions(BuildContext context) {
-    return [
-      IconButton(
-        icon: Icon(Icons.clear),
-        onPressed: () {
-          query = '';
-        },
-      ),
-    ];
-  }
-
-  @override
-  Widget buildLeading(BuildContext context) {
-    return IconButton(
-      icon: Icon(Icons.arrow_back),
-      onPressed: () {
-        close(context, '');
-      },
-    );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
-      rentState.filterItems(query);
-    });
-
-    return Container(
-      color: Colors.white,
-      child: ListView.builder(
-        itemCount: rentState.filteredItems.length,
-        itemBuilder: (BuildContext context, int index) {
-          Map thisItem = rentState.filteredItems[index];
-
-          return Card(
-            margin: const EdgeInsets.all(10),
-            color: Colors.orange.shade100,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Container(
-                  height: 200,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(10),
-                    ),
-                    image: DecorationImage(
-                      image: NetworkImage(
-                        thisItem.containsKey('image')
-                            ? '${thisItem['image']}'
-                            : 'your_default_image_url',
-                      ),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${thisItem['equipmentName']}',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 5),
-                      Text(
-                        'Price: \$${thisItem['price']}',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      SizedBox(height: 5),
-                      Text(
-                        'Description: ${thisItem['description']}',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      SizedBox(height: 5),
-                      Text(
-                        'Location: ${thisItem['location']}',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      SizedBox(height: 5),
-                      Text(
-                        'Contact: ${thisItem['owner']}',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    return Container();
   }
 }
