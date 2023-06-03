@@ -136,24 +136,8 @@ class _ShowEquipmentsState extends State<ShowEquipments> {
                               ),
                               SizedBox(height: 8),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.red,
-                                      borderRadius: BorderRadius.circular(5),
-                                    ),
-                                    child: TextButton(
-                                      onPressed: () => _deleteEquipment(document.id),
-                                      child: Text(
-                                        'Delete',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(width: 8),
                                   Container(
                                     decoration: BoxDecoration(
                                       color: Colors.green,
@@ -163,6 +147,21 @@ class _ShowEquipmentsState extends State<ShowEquipments> {
                                       onPressed: () => _showEditDialog(context, document),
                                       child: Text(
                                         'Edit',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                    child: TextButton(
+                                      onPressed: () => _deleteEquipment(document.id),
+                                      child: Text(
+                                        'Delete',
                                         style: TextStyle(
                                           color: Colors.white,
                                         ),
@@ -187,42 +186,72 @@ class _ShowEquipmentsState extends State<ShowEquipments> {
   }
 
   Future<void> _deleteEquipment(String documentId) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('rent_equipments')
-          .doc(documentId)
-          .delete();
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirmation'),
+          content: Text('Are you sure you want to delete this equipment?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                // Delete the equipment
+                try {
+                  await FirebaseFirestore.instance
+                      .collection('rent_equipments')
+                      .doc(documentId)
+                      .delete();
 
-      // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Equipment deleted successfully.',
-            style: TextStyle(color: Colors.white),
-          ),
-          backgroundColor: Colors.green,
-        ),
-      );
+                  // Show success message
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Equipment deleted successfully.',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
 
-      // Refresh the page
-      setState(() {});
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Failed to delete equipment.',
-            style: TextStyle(color: Colors.white),
-          ),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
+                  // Refresh the page
+                  setState(() {});
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Failed to delete equipment.',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+
+                Navigator.pop(context); // Close the dialog
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _showEditDialog(BuildContext context, QueryDocumentSnapshot document) async {
-    final TextEditingController descriptionController = TextEditingController(text: document['description']);
-    final TextEditingController locationController = TextEditingController(text: document['location']);
-    final TextEditingController priceController = TextEditingController(text: document['price']);
+    final TextEditingController equipmentNameController =
+        TextEditingController(text: document['equipmentName']);
+    final TextEditingController descriptionController =
+        TextEditingController(text: document['description']);
+    final TextEditingController locationController =
+        TextEditingController(text: document['location']);
+    final TextEditingController priceController =
+        TextEditingController(text: document['price']);
 
     showDialog(
       context: context,
@@ -232,6 +261,12 @@ class _ShowEquipmentsState extends State<ShowEquipments> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              TextField(
+                controller: equipmentNameController,
+                decoration: InputDecoration(
+                  labelText: 'Equipment Name',
+                ),
+              ),
               TextField(
                 controller: descriptionController,
                 decoration: InputDecoration(
@@ -258,21 +293,29 @@ class _ShowEquipmentsState extends State<ShowEquipments> {
               child: Text('Cancel'),
             ),
             TextButton(
-              onPressed: () => _updateEquipment(document.id, descriptionController.text, locationController.text, priceController.text),
+              onPressed: () => _updateEquipment(
+                document.id,
+                equipmentNameController.text,
+                descriptionController.text,
+                locationController.text,
+                priceController.text,
+              ),
               child: Text('OK'),
             ),
           ],
         );
       },
-    );
+    ).then((value) {
+      // Refresh the page after the dialog is closed
+      setState(() {});
+    });
   }
 
-  Future<void> _updateEquipment(String documentId, String description, String location, String price) async {
+  Future<void> _updateEquipment(String documentId, String equipmentName, String description,
+      String location, String price) async {
     try {
-      await FirebaseFirestore.instance
-          .collection('rent_equipments')
-          .doc(documentId)
-          .update({
+      await FirebaseFirestore.instance.collection('rent_equipments').doc(documentId).update({
+        'equipmentName': equipmentName,
         'description': description,
         'location': location,
         'price': price,

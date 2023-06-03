@@ -30,7 +30,8 @@ class _ShowCropsState extends State<ShowCrops> {
               .collection('crops')
               .where('owner', isEqualTo: phoneNo)
               .get(),
-          builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          builder:
+              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
                 child: CircularProgressIndicator(),
@@ -60,13 +61,12 @@ class _ShowCropsState extends State<ShowCrops> {
                 itemBuilder: (BuildContext context, int index) {
                   final document = documents[index];
 
-                  final String documentId = document.id;
                   final String cropName = document['cropName'];
                   final String description = document['description'];
                   final String imageUrl = document['image'];
                   final String location = document['location'];
-                  final String price = document['price'].toString();
-                  final String quantity = document['quantity'].toString();
+                  final double price = document['price'].toDouble();
+                  final int quantity = document['quantity'].toInt();
 
                   return Card(
                     elevation: 5,
@@ -149,27 +149,28 @@ class _ShowCropsState extends State<ShowCrops> {
                                 ),
                                 SizedBox(height: 16),
                                 Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     ElevatedButton(
                                       onPressed: () {
                                         _showEditDialog(
-                                          documentId,
+                                          document.id,
                                           cropName,
                                           description,
-                                          price,
-                                          quantity,
+                                          price.toString(),
+                                          quantity.toString(),
                                           location,
                                         );
                                       },
                                       style: ElevatedButton.styleFrom(
-                                        primary: Colors.orange, // Set button color to orange
+                                        primary: Colors.green, // Set button color to green
                                       ),
                                       child: Text('Edit'),
                                     ),
-                                    SizedBox(width: 8),
                                     ElevatedButton(
                                       onPressed: () {
-                                        _showConfirmationDialog(documentId, cropName);
+                                        _showConfirmationDialog(
+                                            document.id, cropName);
                                       },
                                       style: ElevatedButton.styleFrom(
                                         primary: Colors.red, // Set button color to red
@@ -228,45 +229,28 @@ class _ShowCropsState extends State<ShowCrops> {
     );
   }
 
-  Future<void> _deleteCrop(String documentId, String cropName) async {
-    try {
-      await FirebaseFirestore.instance.collection('crops').doc(documentId).delete();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Successfully deleted crop: $cropName',
-            style: TextStyle(color: Colors.white),
-          ),
-          backgroundColor: Colors.green,
-        ),
-      );
-
-      // Refresh the page
-      setState(() {});
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Failed to delete crop: $cropName',
-            style: TextStyle(color: Colors.white),
-          ),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  Future<void> _showEditDialog(String documentId, String cropName, String description, String price, String quantity, String location) async {
-    final TextEditingController cropNameController = TextEditingController(text: cropName);
-    final TextEditingController descriptionController = TextEditingController(text: description);
-    final TextEditingController priceController = TextEditingController(text: price);
-    final TextEditingController quantityController = TextEditingController(text: quantity);
-    final TextEditingController locationController = TextEditingController(text: location);
+  Future<void> _showEditDialog(
+    String documentId,
+    String cropName,
+    String description,
+    String price,
+    String quantity,
+    String location,
+  ) async {
+    TextEditingController cropNameController =
+        TextEditingController(text: cropName);
+    TextEditingController descriptionController =
+        TextEditingController(text: description);
+    TextEditingController priceController =
+        TextEditingController(text: price);
+    TextEditingController quantityController =
+        TextEditingController(text: quantity);
+    TextEditingController locationController =
+        TextEditingController(text: location);
 
     return showDialog<void>(
       context: context,
-      barrierDismissible: false, // user must tap button for close
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Edit Crop'),
@@ -275,33 +259,27 @@ class _ShowCropsState extends State<ShowCrops> {
               children: <Widget>[
                 TextField(
                   controller: cropNameController,
-                  decoration: InputDecoration(
-                    labelText: 'Crop Name',
-                  ),
+                  decoration: InputDecoration(labelText: 'Crop Name'),
                 ),
+                SizedBox(height: 8),
                 TextField(
                   controller: descriptionController,
-                  decoration: InputDecoration(
-                    labelText: 'Description',
-                  ),
+                  decoration: InputDecoration(labelText: 'Description'),
                 ),
+                SizedBox(height: 8),
                 TextField(
                   controller: priceController,
-                  decoration: InputDecoration(
-                    labelText: 'Price',
-                  ),
+                  decoration: InputDecoration(labelText: 'Price'),
                 ),
+                SizedBox(height: 8),
                 TextField(
                   controller: quantityController,
-                  decoration: InputDecoration(
-                    labelText: 'Quantity',
-                  ),
+                  decoration: InputDecoration(labelText: 'Quantity'),
                 ),
+                SizedBox(height: 8),
                 TextField(
                   controller: locationController,
-                  decoration: InputDecoration(
-                    labelText: 'Location',
-                  ),
+                  decoration: InputDecoration(labelText: 'Location'),
                 ),
               ],
             ),
@@ -314,16 +292,22 @@ class _ShowCropsState extends State<ShowCrops> {
               },
             ),
             TextButton(
-              child: Text('OK'),
+              child: Text('Ok'),
               onPressed: () {
+                String newCropName = cropNameController.text.trim();
+                String newDescription = descriptionController.text.trim();
+                double newPrice = double.parse(priceController.text.trim());
+                int newQuantity = int.parse(quantityController.text.trim());
+                String newLocation = locationController.text.trim();
+
                 Navigator.of(context).pop();
                 _updateCrop(
                   documentId,
-                  cropNameController.text,
-                  descriptionController.text,
-                  priceController.text,
-                  quantityController.text,
-                  locationController.text,
+                  newCropName,
+                  newDescription,
+                  newPrice,
+                  newQuantity,
+                  newLocation,
                 );
               },
             ),
@@ -333,13 +317,23 @@ class _ShowCropsState extends State<ShowCrops> {
     );
   }
 
-  Future<void> _updateCrop(String documentId, String cropName, String description, String price, String quantity, String location) async {
+  Future<void> _updateCrop(
+    String documentId,
+    String cropName,
+    String description,
+    double price,
+    int quantity,
+    String location,
+  ) async {
     try {
-      await FirebaseFirestore.instance.collection('crops').doc(documentId).update({
+      await FirebaseFirestore.instance
+          .collection('crops')
+          .doc(documentId)
+          .update({
         'cropName': cropName,
         'description': description,
-        'price': double.parse(price),
-        'quantity': int.parse(quantity),
+        'price': price,
+        'quantity': quantity,
         'location': location,
       });
 
@@ -360,6 +354,38 @@ class _ShowCropsState extends State<ShowCrops> {
         SnackBar(
           content: Text(
             'Failed to update crop: $cropName',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _deleteCrop(String documentId, String cropName) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('crops')
+          .doc(documentId)
+          .delete();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Successfully deleted crop: $cropName',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Refresh the page
+      setState(() {});
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Failed to delete crop: $cropName',
             style: TextStyle(color: Colors.white),
           ),
           backgroundColor: Colors.red,
