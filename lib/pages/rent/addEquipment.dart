@@ -146,7 +146,7 @@ class _AddEquipmentState extends State<AddEquipment> {
                     child: Row(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.assignment_turned_in_outlined),
+                          icon: const Icon(Icons.check_circle_outline),
                           onPressed: () {},
                         ),
                         IconButton(

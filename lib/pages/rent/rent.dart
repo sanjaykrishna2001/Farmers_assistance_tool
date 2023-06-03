@@ -16,6 +16,7 @@ class Rent extends StatefulWidget {
 class _RentState extends State<Rent> {
   late String phoneNo;
   late int currentIndex;
+  bool searchByEquipmentName = true; // Flag to toggle search by equipment name or location
 
   _RentState(this.currentIndex, this.phoneNo);
 
@@ -42,8 +43,66 @@ class _RentState extends State<Rent> {
       } else {
         filteredItems = items.where((item) {
           final itemName = item['equipmentName'].toString().toLowerCase();
-          return itemName.contains(query.toLowerCase());
+          final location = item['location'].toString().toLowerCase();
+          if (searchByEquipmentName) {
+            return itemName.contains(query.toLowerCase());
+          } else {
+            return location.contains(query.toLowerCase());
+          }
         }).toList();
+      }
+    });
+  }
+
+  void toggleSearchBy() {
+    setState(() {
+      searchByEquipmentName = !searchByEquipmentName;
+      searchController.clear();
+      filterItems('');
+    });
+  }
+
+  void _showFilterOptions(BuildContext context) {
+    final List<PopupMenuEntry<bool>> options = <PopupMenuEntry<bool>>[
+      PopupMenuItem<bool>(
+        value: true,
+        child: const ListTile(
+          leading: Icon(Icons.search),
+          title: Text('Search by Equipment Name'),
+        ),
+      ),
+      PopupMenuItem<bool>(
+        value: false,
+        child: const ListTile(
+          leading: Icon(Icons.search),
+          title: Text('Search by Location'),
+        ),
+      ),
+    ];
+
+    final RenderBox button = context.findRenderObject() as RenderBox;
+    final RenderBox overlay =
+        Overlay.of(context)!.context.findRenderObject() as RenderBox;
+    final RelativeRect position = RelativeRect.fromRect(
+      Rect.fromPoints(
+        button.localToGlobal(Offset.zero, ancestor: overlay),
+        button.localToGlobal(button.size.bottomRight(Offset.zero),
+            ancestor: overlay),
+      ),
+      Offset.zero & overlay.size,
+    );
+
+    showMenu<bool>(
+      context: context,
+      position: position,
+      items: options,
+    ).then((value) {
+      if (value != null) {
+        setState(() {
+          searchByEquipmentName = value;
+          searchController.clear();
+          filterItems('');
+        });
       }
     });
   }
@@ -79,7 +138,7 @@ class _RentState extends State<Rent> {
           body: Column(
             children: [
               Container(
-                padding: EdgeInsets.all(10),
+                padding: const EdgeInsets.all(10),
                 child: Row(
                   children: [
                     Expanded(
@@ -88,20 +147,48 @@ class _RentState extends State<Rent> {
                         onChanged: (value) {
                           filterItems(value);
                         },
+                        style: const TextStyle(fontSize: 18),
                         decoration: InputDecoration(
-                          hintText: 'Search by equipment name',
+                          hintText: searchByEquipmentName
+                              ? 'Search by equipment name'
+                              : 'Search by location',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
+                          filled: true,
+                          fillColor: Colors.white,
+                          prefixIcon: const Icon(Icons.search,
+                              size: 28, color: Colors.grey),
+                          suffixIcon: PopupMenuButton<bool>(
+                            onSelected: (value) {
+                              setState(() {
+                                searchByEquipmentName = value;
+                                searchController.clear();
+                                filterItems('');
+                              });
+                            },
+                            itemBuilder: (BuildContext context) {
+                              return <PopupMenuEntry<bool>>[
+                                PopupMenuItem<bool>(
+                                  value: true,
+                                  child: const ListTile(
+                                    leading: Icon(Icons.search),
+                                    title: Text('Search by Equipment Name'),
+                                  ),
+                                ),
+                                PopupMenuItem<bool>(
+                                  value: false,
+                                  child: const ListTile(
+                                    leading: Icon(Icons.search),
+                                    title: Text('Search by Location'),
+                                  ),
+                                ),
+                              ];
+                            },
+                            icon: const Icon(Icons.more_vert),
+                          ),
                         ),
                       ),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        searchController.clear();
-                        filterItems('');
-                      },
-                      icon: Icon(Icons.clear),
                     ),
                   ],
                 ),
@@ -125,7 +212,7 @@ class _RentState extends State<Rent> {
                             height: 200,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.vertical(
-                                top: Radius.circular(10),
+                                top: const Radius.circular(10),
                               ),
                               image: DecorationImage(
                                 image: NetworkImage(
@@ -144,30 +231,30 @@ class _RentState extends State<Rent> {
                               children: [
                                 Text(
                                   '${thisItem['equipmentName']}',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                SizedBox(height: 5),
+                                const SizedBox(height: 5),
                                 Text(
-                                  'Price: \u20B9${thisItem['price']}',
-                                  style: TextStyle(fontSize: 16),
+                                  'Price: ₹${thisItem['price']} (price per day)',
+                                  style: const TextStyle(fontSize: 16),
                                 ),
-                                SizedBox(height: 5),
+                                const SizedBox(height: 5),
                                 Text(
                                   'Description: ${thisItem['description']}',
-                                  style: TextStyle(fontSize: 16),
+                                  style: const TextStyle(fontSize: 16),
                                 ),
-                                SizedBox(height: 5),
+                                const SizedBox(height: 5),
                                 Text(
                                   'Location: ${thisItem['location']}',
-                                  style: TextStyle(fontSize: 16),
+                                  style: const TextStyle(fontSize: 16),
                                 ),
-                                SizedBox(height: 5),
+                                const SizedBox(height: 5),
                                 Text(
                                   'Contact: ${thisItem['owner']}',
-                                  style: TextStyle(fontSize: 16),
+                                  style: const TextStyle(fontSize: 16),
                                 ),
                               ],
                             ),
@@ -192,11 +279,10 @@ class _RentState extends State<Rent> {
                 ),
               );
             },
-            label: Text('Add'),
-            icon: Icon(Icons.add),
+            label: const Text('Add'),
+            icon: const Icon(Icons.add),
           ),
-          floatingActionButtonLocation:
-              FloatingActionButtonLocation.endFloat,
+          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         );
       },
     );

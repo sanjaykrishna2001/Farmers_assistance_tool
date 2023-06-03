@@ -20,7 +20,7 @@ class AddCrop extends StatefulWidget {
 class _AddCropState extends State<AddCrop> {
   late String phoneNo;
   _AddCropState(this.phoneNo);
-  late String cropName, price, description, location;
+  late String cropName, price, description, location, quantity;
   late bool uploaded = false;
   XFile? file;
   var db = FirebaseFirestore.instance;
@@ -76,6 +76,29 @@ class _AddCropState extends State<AddCrop> {
                 onChanged: (val) {
                   setState(() {
                     price = val;
+                  });
+                },
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              "Enter quantity availablle",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 25.0, right: 25.0),
+              child: TextFormField(
+                keyboardType: TextInputType.name,
+                decoration: const InputDecoration(
+                  hintText: ('Quantity in Kg'),
+                  prefixIcon: Icon(Icons.currency_rupee),
+                  enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey)),
+                  border: OutlineInputBorder(),
+                ),
+                onChanged: (val) {
+                  setState(() {
+                    quantity = val;
                   });
                 },
               ),
@@ -146,7 +169,7 @@ class _AddCropState extends State<AddCrop> {
                     child: Row(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.assignment_turned_in_outlined),
+                          icon: const Icon(Icons.check_circle_outline),
                           onPressed: () {},
                         ),
                         IconButton(
@@ -198,35 +221,25 @@ class _AddCropState extends State<AddCrop> {
                               .putFile(File(file!.path));
                           imageUrl =
                               await referenceImageToUpload.getDownloadURL();
-                          if (cropName != "" &&
-                              price != "" &&
-                              description != "" &&
-                              location != "" &&
-                              imageUrl != "" &&
-                              phoneNo != "" &&
-                              file != null) {
-                            Map<String, String> data = {
-                              'cropName': cropName,
-                              'price': price,
-                              'description': description,
-                              'location': location,
-                              'image': imageUrl,
-                              'owner': phoneNo
-                            };
-                            db.collection("crops").add(data);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => HomePage(
-                                  currentIndex: 2,
-                                  phoneNo: phoneNo,
-                                ),
+                          Map<String, String> data = {
+                            'cropName': cropName,
+                            'price': price,
+                            'quantity': quantity,
+                            'description': description,
+                            'location': location,
+                            'image': imageUrl,
+                            'owner': phoneNo
+                          };
+                          db.collection("crops").add(data);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => HomePage(
+                                currentIndex: 2,
+                                phoneNo: phoneNo,
                               ),
-                            );
-                          } else {
-                            const Center(
-                                child: Text("Please fill all the details"));
-                          }
+                            ),
+                          );
                         } catch (e) {
                           const Center(child: Text("Error in image upload "));
                         }
