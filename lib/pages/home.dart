@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:farmers_assistance_tool/auth/login.dart';
 import 'package:farmers_assistance_tool/pages/crop_sell/crop.dart';
 import 'package:farmers_assistance_tool/pages/detection.dart';
-import 'package:farmers_assistance_tool/pages/profile.dart';
+import 'package:farmers_assistance_tool/pages/profile/profile.dart';
 import 'package:farmers_assistance_tool/pages/rent/rent.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -41,24 +41,6 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Farmers assistance tool'),
-        actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.exit_to_app,
-              color: Colors.black,
-            ),
-            onPressed: () async {
-              await FirebaseAuth.instance.signOut();
-              // ignore: use_build_context_synchronously
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const login(),
-                ),
-              );
-            },
-          )
-        ],
       ),
       body: showwidget(),
       bottomNavigationBar: BottomNavigationBar(

@@ -48,7 +48,7 @@ class _MyAppState extends State<MyApp> {
     return const MaterialApp(
         debugShowCheckedModeBanner: false,
         home: HomePage(
-          currentIndex: 0,
+          currentIndex: 3,
           phoneNo: "+919902513539",
         )
         // login(),
