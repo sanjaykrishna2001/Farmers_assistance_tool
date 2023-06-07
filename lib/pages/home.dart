@@ -29,7 +29,8 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Farmers Assistance Tool'),
         backgroundColor: Colors.green, // Set the background color of the AppBar
-        centerTitle: true, // Center the title horizontally
+        centerTitle: true,
+        automaticallyImplyLeading: false,
       ),
       body: showWidget(),
       bottomNavigationBar: BottomNavigationBar(
