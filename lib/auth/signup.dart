@@ -124,12 +124,12 @@ class _signupState extends State<signup> {
                                   verificationId: verificationId,
                                   smsCode: smsCode);
                           await auth.signInWithCredential(credential);
-                          final city = <String, String>{
+                          final user = <String, String>{
                             "name": userName,
                             "phone": phoneNo,
                           };
 
-                          db.collection("users").doc(phoneNo).set(city).onError(
+                          db.collection("users").doc(phoneNo).set(user).onError(
                               (e, _) => print("Error writing document: $e"));
                           // ignore: use_build_context_synchronously
                           Navigator.push(

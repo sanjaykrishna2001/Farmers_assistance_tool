@@ -118,8 +118,8 @@ class _CropState extends State<Crop> {
                               fontSize: 18,
                               color: Colors.grey,
                             ),
-                            prefixIcon:
-                                Icon(Icons.search, size: 28, color: Colors.grey),
+                            prefixIcon: Icon(Icons.search,
+                                size: 28, color: Colors.grey),
                             suffixIcon: IconButton(
                               onPressed: () {
                                 _searchController.clear();
@@ -132,8 +132,7 @@ class _CropState extends State<Crop> {
                             border: InputBorder.none,
                             contentPadding: const EdgeInsets.symmetric(
                                 vertical: 15, horizontal: 20),
-                            floatingLabelBehavior:
-                                FloatingLabelBehavior.never,
+                            floatingLabelBehavior: FloatingLabelBehavior.never,
                           ),
                         ),
                       ),
@@ -141,7 +140,8 @@ class _CropState extends State<Crop> {
                         flex: 1,
                         child: PopupMenuButton<String>(
                           itemBuilder: (BuildContext context) {
-                            return ['Crop Name', 'Location'].map((String choice) {
+                            return ['Crop Name', 'Location']
+                                .map((String choice) {
                               return PopupMenuItem<String>(
                                 value: choice,
                                 child: Text(choice),
